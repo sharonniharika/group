@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ParkEase Dashboard</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #00b09b, #96c93d);
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      width: 90%;
+      max-width: 800px;
+      text-align: center;
+    }
+    h2 {
+      color: #00b09b;
+      margin-bottom: 20px;
+    }
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+      margin-top: 20px;
+    }
+    .slot {
+      background: #f1f1f1;
+      padding: 15px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+    .slot.available {
+      border: 2px solid #4caf50;
+    }
+    .slot.booked {
+      background: #ffcdd2;
+      border: 2px solid #f44336;
+      cursor: not-allowed;
+    }
+    .slot:hover {
+      transform: scale(1.05);
+    }
+    a {
+      display: block;
+      margin-top: 15px;
+      color: #00b09b;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Welcome to ParkEase Dashboard 🚗</h2>
+    <div class="slot-grid" id="slots">
+      <!-- Slots will load here -->
+    </div>
+    <a href="/login">Logout</a>
+  </div>
+
+  <script>
+    async function loadSlots() {
+      const response = await fetch("/api/slots");
+      const slots = await response.json();
+      const container = document.getElementById("slots");
+      container.innerHTML = "";
+
+      slots.forEach(slot => {
+        const div = document.createElement("div");
+        div.className = slot ${slot.booked ? "booked" : "available"};
+        div.textContent = Slot ${slot.number};
+        if (!slot.booked) {
+          div.onclick = () => bookSlot(slot.number);
+        }
+        container.appendChild(div);
+      });
+    }
+
+    async function bookSlot(slotNumber) {
+      if (confirm(`Do you want to book Slot ${slotNumber}?`)) {
+        const res = await fetch("/api/bookSlot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slotNumber })
+        });
+        alert(await res.text());
+        loadSlots();
+      }
+    }
+
+    loadSlots();
+  </script>
+</body>
+</html>
